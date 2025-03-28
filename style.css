@@ -1,0 +1,143 @@
+/* Basic styles */
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 0; /* Remove default margin */
+    background-color: #f4f4f4;
+    display: flex; /* Ensure body takes full height */
+    min-height: 100vh;
+}
+
+h1, h2, h3 {
+    color: #333;
+    margin-top: 0;
+}
+h1 { text-align: center; margin-bottom: 20px;}
+h2 { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+h3 { margin-bottom: 8px; font-size: 1.1em;}
+
+/* Layout */
+.app-container {
+    display: flex;
+    width: 100%;
+}
+
+#settings-panel {
+    width: 280px; /* Fixed width for sidebar */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    padding: 20px;
+    background: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    height: 100vh; /* Full height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-sizing: border-box; /* Include padding in width/height */
+}
+
+#trainer {
+    flex-grow: 1; /* Trainer takes remaining space */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 100vh; /* Full height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-sizing: border-box;
+}
+
+/* Settings Panel Specifics */
+#mode-selection div,
+#verb-selection .scrollable-list div,
+#noun-selection .scrollable-list div {
+    margin-bottom: 5px;
+}
+#mode-selection label,
+#verb-selection label,
+#noun-selection label {
+    margin-left: 5px;
+    cursor: pointer;
+}
+#mode-selection small {
+    display: block;
+    margin-left: 20px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.scrollable-list {
+    max-height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+#settings-error { /* Error message within settings */
+     margin-top: 15px;
+     font-weight: bold;
+}
+
+
+/* Trainer Styles (mostly unchanged, minor adjustments) */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px; /* Reduced margin */
+    flex-wrap: wrap;
+}
+.controls label { font-weight: bold; }
+.controls select { padding: 5px; border-radius: 4px; }
+.controls button { /* Speaker icon */
+    padding: 5px 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.controls button:hover { background: #ddd; }
+
+.phrase-section {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    min-height: 50px; /* Slightly reduced height */
+}
+.phrase-section p { margin-top: 0; font-weight: bold; color: #555; margin-bottom: 5px;}
+#prompt-text, #result { font-size: 1.2em; margin-top: 5px; }
+
+.input-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#user-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+
+#speak-answer-button, #submit-button {
+    padding: 10px 15px; cursor: pointer; border: none; border-radius: 4px; color: white;
+}
+#speak-answer-button { background-color: #337ab7; }
+#speak-answer-button:hover { background-color: #286090; }
+#submit-button { background-color: #5bc0de; }
+#submit-button:hover { background-color: #46b8da; }
+
+#next-button {
+    display: block; margin: 15px auto 0; padding: 10px 20px; background-color: #f0ad4e;
+    color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em;
+}
+#next-button:hover { background-color: #ec971f; }
+
+/* Highlighting & Utility */
+.correct-char { color: green; font-weight: bold; }
+.incorrect-char { /* Optional: style for incorrect chars */ }
+.hidden { display: none !important; } /* Use !important to override potential conflicts */
+.error { color: red; text-align: left; margin-top: 10px; font-size: 0.9em;}
+#speech-status { color: #888; font-style: italic; margin-top: 5px; }
+
+#mode-selection select {
+    width: 100%; /* Занять всю ширину контейнера */
+    padding: 8px;
+    margin-bottom: 15px; /* Отступ снизу */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Учесть padding в ширине */
+}

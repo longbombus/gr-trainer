@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер греческого языка</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Панель настроек (Сайдбар) -->
+        <div id="settings-panel">
+            <h2>Настройки</h2>
+
+            <div id="mode-selection">
+                <h3>Режим тренировки:</h3>
+                <select id="training-mode-select">
+                    <option value="pronouns">Только местоимения</option>
+                    <option value="nouns">Только существительные</option>
+                    <option value="verbs">Только глаголы</option>
+                    <option value="phrases">Фразы</option>
+                </select>
+            </div>
+
+            <div id="verb-selection">
+                <h3>Глаголы:</h3>
+                <div class="scrollable-list">
+                    <!-- Чекбоксы для глаголов -->
+                </div>
+            </div>
+
+            <div id="noun-selection">
+                <h3>Существительные:</h3>
+                 <div class="scrollable-list">
+                    <!-- Чекбоксы для существительных -->
+                 </div>
+            </div>
+             <p id="settings-error" class="error hidden"></p>
+        </div>
+
+        <!-- Основная область тренажера -->
+        <div id="trainer">
+             <h1>Тренажер греческого языка</h1>
+            <div class="controls">
+                <label for="language-mode">Направление:</label>
+                <select id="language-mode">
+                    <option value="ru-gr">Русский -> Греческий</option>
+                    <option value="gr-ru">Греческий -> Русский</option>
+                </select>
+                <button id="speak-prompt-button" title="Озвучить фразу">🔊</button>
+            </div>
+
+            <div class="phrase-section" id="prompt-section">
+                <p>Задание:</p>
+                <div id="prompt-text">-</div>
+            </div>
+
+            <div class="phrase-section" id="result-section">
+                <p>Результат:</p>
+                <div id="result"></div>
+            </div>
+
+            <div class="phrase-section" id="input-section">
+                <p>Ваш ответ:</p>
+                <div class="input-controls">
+                    <input type="text" id="user-input" placeholder="Введите перевод...">
+                    <button id="speak-answer-button" title="Сказать ответ">🎤</button>
+                    <button id="submit-button">Проверить</button>
+                </div>
+                 <p id="speech-status" class="hidden">Говорите...</p>
+            </div>
+
+            <button id="next-button">Следующая фраза</button>
+            <p id="error-message" class="error hidden"></p> <!-- Ошибки тренажера -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
