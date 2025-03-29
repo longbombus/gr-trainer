@@ -150,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const speakAnswerButton = document.getElementById('speak-answer-button');
     const submitButton = document.getElementById('submit-button');
-    const nextButton = document.getElementById('next-button');
     const speechStatusP = document.getElementById('speech-status');
     const errorMessageP = document.getElementById('error-message');
     const settingsErrorP = document.getElementById('settings-error');
@@ -272,11 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
         clearSettingsError(); // Clear errors in the settings panel
         resultDiv.innerHTML = ''; // Очищаем поле результата
         userInput.value = ''; // Очищаем поле ввода
-        // --- УДАЛИТЬ ИЛИ ЗАКОММЕНТИРОВАТЬ СЛЕДУЮЩУЮ СТРОКУ ---
-        // nextButton.classList.add('hidden'); // Больше не скрываем кнопку "Далее" здесь
-        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
         submitButton.disabled = false; // Кнопка "Проверить" должна быть активна для новой фразы
         speakAnswerButton.disabled = recognition === null; // Reset speech button state
+
+        submitButton.textContent = 'Проверить'; // Устанавливаем текст
+        submitButton.onclick = handleSubmit; // Назначаем обработчик проверки
 
         currentPhrase = null; // Reset current phrase
         let phraseGenerated = false; // Flag to check if generation was successful
@@ -444,6 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
              submitButton.disabled = true;
              speakAnswerButton.disabled = true;
         }
+
+        userInput.focus();
     }
 
     function updatePromptAndInputMode() {
@@ -540,11 +541,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Отображаем эмодзи как "ответ" пользователя и правильный ответ
             resultDiv.innerHTML = `Ваш ответ: ${randomEmoji}<br>Правильный ответ: ${expectedAnswer}`;
-
-            // Обновляем состояние кнопок (как и при обычной проверке)
-            submitButton.disabled = true;
-            speakAnswerButton.disabled = true;
-            // nextButton уже должна быть видима
+            
+            submitButton.textContent = 'Следующая фраза';
+            submitButton.onclick = generateNewPhrase; // Теперь кнопка генерирует новую фразу
+            submitButton.disabled = false; // Кнопка должна быть активна для перехода
+            speakAnswerButton.disabled = true; // Отключаем "Говорить"
+            userInput.disabled = true; // Блокируем ввод после ответа
 
             return; // Прерываем выполнение функции handleSubmit здесь
         }
@@ -587,10 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Собираем подсвеченные слова обратно в строку с пробелами
         resultDiv.innerHTML = `Ваш ответ: ${resultHTML.join(' ')}<br>Правильный ответ: ${expectedAnswer}`;
 
-        // 5. Обновляем состояние кнопок
-        // nextButton остается видимой (согласно предыдущему шагу)
-        submitButton.disabled = true; // Отключаем "Проверить" после проверки
-        speakAnswerButton.disabled = true; // Отключаем "Говорить" после проверки
+        submitButton.textContent = 'Следующая фраза';
+        submitButton.onclick = generateNewPhrase; // Теперь кнопка генерирует новую фразу
+        submitButton.disabled = false; // Кнопка должна быть активна для перехода
+        speakAnswerButton.disabled = true; // Отключаем "Говорить"
+        userInput.disabled = true; // Блокируем ввод после ответа
     }
 
     function handleSpeechRequest() {
@@ -698,10 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 speakText(textToSpeak, lang);
             }
         });
-        submitButton.addEventListener('click', handleSubmit);
+        submitButton.onclick = handleSubmit;
         userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSubmit(); });
         speakAnswerButton.addEventListener('click', handleSpeechRequest);
-        nextButton.addEventListener('click', generateNewPhrase);
 
          // Initial check for Speech API support and update buttons
         if (typeof synth === 'undefined') { speakPromptButton.disabled = true; speakPromptButton.title = "Синтез речи не поддерживается"; }
