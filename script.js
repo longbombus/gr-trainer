@@ -1,11 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Data Definitions (Оставляем как было, с артиклями у существительных) ---
     const pronouns = [
-        // Добавляем gr_acc_weak: με, σε, τον, την, το, μας, σας, τους, τις, τα
-        // Добавляем ru_acc: меня, тебя, его, её, его, нас, вас, их, их, их
         { person: 1, number: 'sg', gr: 'εγώ', ru: 'я', gr_gen: 'μου', ru_dat: 'мне', gr_acc_weak: 'με', ru_acc: 'меня' },
         { person: 2, number: 'sg', gr: 'εσύ', ru: 'ты', gr_gen: 'σου', ru_dat: 'тебе', gr_acc_weak: 'σε', ru_acc: 'тебя' },
-        // Для 3 лица ед.ч. винительный зависит от рода СЛЕДУЮЩЕГО слова, но для изолированного показа берем базовые формы τον, την, το
         { person: 3, number: 'sg', gr: 'αυτός', ru: 'он', gr_gen: 'του', ru_dat: 'ему', gr_acc_weak: 'τον', ru_acc: 'его' },
         { person: 3, number: 'sg', gr: 'αυτή', ru: 'она', gr_gen: 'της', ru_dat: 'ей', gr_acc_weak: 'την', ru_acc: 'её' },
         { person: 3, number: 'sg', gr: 'αυτό', ru: 'оно', gr_gen: 'του', ru_dat: 'ему', gr_acc_weak: 'το', ru_acc: 'его (ср)' }, // 'оно' в рус. вин. падеже совпадает с род. 'его'
@@ -18,44 +15,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const nouns = [
         { id: 'man', gr_sg: 'άνδρας', gr_pl: 'άνδρες', ru_sg: 'мужчина', ru_pl: 'мужчины', gr_sg_art: 'ο άνδρας', gr_pl_art: 'οι άνδρες'},
-        { id: 'woman', gr_sg: 'γυναίκα', gr_pl: 'γυναίκες', ru_sg: 'женщина', ru_pl: 'женщины', gr_sg_art: 'η γυναίκα', gr_pl_art: 'οι γυναίκες'},
-        { id: 'child', gr_sg: 'παιδί', gr_pl: 'παιδιά', ru_sg: 'ребёнок', ru_pl: 'дети', gr_sg_art: 'το παιδί', gr_pl_art: 'τα παιδιά'}
-    ];
+        { id: 'aftokinito', gr_sg: 'αυτοκίνητο', gr_pl: 'αυτοκίνητα', ru_sg: 'машина', ru_pl: 'машины', gr_sg_art: 'το αυτοκίνητο', gr_pl_art: 'τα αυτοκίνητα'},
+        { id: 'woman', gr_sg: 'γυναίка', gr_pl: 'γυναίκες', ru_sg: 'женщина', ru_pl: 'женщины', gr_sg_art: 'η γυναίка', gr_pl_art: 'οι γυναίκες'},
+        { id: 'child', gr_sg: 'παιδί', gr_pl: 'παιδιά', ru_sg: 'ребёнок', ru_pl: 'дети', gr_sg_art: 'το παιδί', gr_pl_art: 'τα παιδιά'},
+        { id: 'spiti', gr_sg: 'σπίτι', gr_pl: 'σπίτια', ru_sg: 'дом', ru_pl: 'дома', gr_sg_art: 'το σπίτι', gr_pl_art: 'τα σπίτια'},
+    ]
 
     const verbs = [
         {
-            id: 'einai',
-            gr_inf: 'είμαι',
-            ru_inf: 'быть/являться',
-            conjugations: { // Греческие спряжения
-                '1sg': 'είμαι', '2sg': 'είσαι', '3sg': 'είναι',
-                '1pl': 'είμαστε', '2pl': 'είστε', '3pl': 'είναι'
+            id: 'akouo',
+            gr_inf: 'ακούω',
+            ru_inf: 'слышать/слушать',
+            conjugations: {
+                '1sg': 'ακούω', '2sg': 'ακούς', '3sg': 'ακούει',
+                '1pl': 'ακούμε', '2pl': 'ακούτε', '3pl': 'ακούν(ε)' // Вариант с (ε)
             },
-            ru_conjugations: { // Русские спряжения (для режимов 'verbs' и 'phrases')
-                '1sg': 'являюсь', '2sg': 'являешься', '3sg': 'является',
-                '1pl': 'являемся', '2pl': 'являетесь', '3pl': 'являются'
-                // Используем "являться", т.к. "быть" в настоящем времени обычно опускается или архаично.
+            ru_conjugations: {
+                '1sg': 'слышу', '2sg': 'слышишь', '3sg': 'слышит',
+                '1pl': 'слышим', '2pl': 'слышите', '3pl': 'слышат'
             },
-            // ГЕНЕРАТОР ФРАЗ ДЛЯ РЕЖИМА "ФРАЗЫ"
-            generatePhraseModePhrase: (pronoun, nounData) => {
-                // Логика для 'einai' в режиме фраз остается прежней
-                const usePlural = pronoun.number === 'pl';
-                const noun_gr = usePlural ? nounData.gr_pl : nounData.gr_sg;
-                const noun_ru = usePlural ? nounData.ru_pl : nounData.ru_sg;
-                const personNumber = `${pronoun.person}${pronoun.number}`;
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => { // nouns не используется
+                if (!availablePronouns || availablePronouns.length < 2) return null; // Нужно минимум 2 местоимения (субъект и объект)
+                const thisVerb = verbs.find(v => v.id === 'akouo');
+                if (!thisVerb) return null;
 
-                // Находим данные глагола 'einai' для доступа к спряжениям
-                 const einaiVerbData = verbs.find(v => v.id === 'einai');
-                 if (!einaiVerbData) return null; // На всякий случай
+                // Выбираем субъект и ОБЯЗАТЕЛЬНО ДРУГОЙ объект
+                const subjectPronoun = getRandomElement(availablePronouns);
+                let objectPronoun = getRandomElement(availablePronouns);
 
-                const verbFormGr = einaiVerbData.conjugations[personNumber];
-                // Для русской фразы "Я - мужчина" глагол 'являюсь' опускается
-                let subj_ru = pronoun.ru;
-                if (pronoun.number === 'pl' && pronoun.person === 3) subj_ru = 'они';
+                const subjPersonNum = `${subjectPronoun.person}${subjectPronoun.number}`;
+                const verbFormGr = thisVerb.conjugations[subjPersonNum];
+                const verbFormRu = thisVerb.ru_conjugations[subjPersonNum];
+                const objFormGr = objectPronoun.gr_acc_weak;
+                const objFormRu = objectPronoun.ru_acc;
 
-                const gr_phrase = `${verbFormGr} ${noun_gr}`; // Местоимение опущено
-                const ru_phrase = `${subj_ru} - ${noun_ru}`; // Глагол опущен
-
+                if (!verbFormGr || !verbFormRu || !objFormGr || !objFormRu) { console.error(`Missing forms for akouo`); return null; }
+                const gr_phrase = `${objFormGr} ${verbFormGr}`;
+                const ru_phrase = `${subjectPronoun.ru} ${verbFormRu} ${objFormRu}`;
                 return { greek: gr_phrase, russian: ru_phrase };
             }
         },
@@ -71,68 +67,212 @@ document.addEventListener('DOMContentLoaded', () => {
                 '1sg': 'нравлюсь', '2sg': 'нравишься', '3sg': 'нравится',
                 '1pl': 'нравимся', '2pl': 'нравитесь', '3pl': 'нравятся'
             },
-            // ОБНОВЛЕННЫЙ ГЕНЕРАТОР ФРАЗ ДЛЯ РЕЖИМА "ФРАЗЫ"
-            generatePhraseModePhrase: (likerPronoun, availableNouns) => {
-                 const aresoVerbData = verbs.find(v => v.id === 'areso');
-                 if (!aresoVerbData) return null; // На всякий случай
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => {
+                if (!availablePronouns || availablePronouns.length === 0) return null;
+                const aresoVerbData = verbs.find(v => v.id === 'areso');
+                if (!aresoVerbData) return null;
 
-                 const usePronounObject = Math.random() < 0.5; // 50% шанс, что объект - местоимение
+                // Выбираем "кому нравится"
+                const likerPronoun = getRandomElement(availablePronouns);
 
-                 if (usePronounObject) {
-                     // --- Вариант: Объект - Местоимение ("Ты мне нравишься") ---
-                     let likedPronoun;
-                     do {
-                         likedPronoun = getRandomElement(pronouns);
-                     } while (likerPronoun === likedPronoun); // Убедимся, что это разные местоимения
+                // Решаем, будет ли объект местоимением ИЛИ если нет доступных существительных
+                // Также проверяем, есть ли *другое* местоимение для выбора
+                const canUsePronounObject = availablePronouns.length > 1;
+                const usePronounObject = (canUsePronounObject && Math.random() < 0.5) || availableNouns.length === 0;
 
-                     const personNumberLiked = `${likedPronoun.person}${likedPronoun.number}`;
+                if (usePronounObject) {
+                     if (!canUsePronounObject) return null; // Не можем выбрать другое местоимение
+                    // Вариант: Объект - Местоимение ("Ты мне нравишься")
+                    let likedPronoun;
+                    do {
+                        likedPronoun = getRandomElement(availablePronouns);
+                    } while (likerPronoun === likedPronoun); // Убедимся, что это разные местоимения
 
-                     // Греческий глагол зависит от likedPronoun
-                     const verbFormGr = aresoVerbData.conjugations[personNumberLiked];
-                     // Русский глагол зависит от likedPronoun
-                     const verbFormRu = aresoVerbData.ru_conjugations[personNumberLiked];
+                    const personNumberLiked = `${likedPronoun.person}${likedPronoun.number}`;
+                    const verbFormGr = aresoVerbData.conjugations[personNumberLiked];
+                    const verbFormRu = aresoVerbData.ru_conjugations[personNumberLiked];
+                    if (!verbFormGr || !verbFormRu) { console.error(`Missing conj for areso ${personNumberLiked}`); return null; }
 
-                     if (!verbFormGr || !verbFormRu) {
-                         console.error(`Missing conjugation for areso, personNumber: ${personNumberLiked}`);
-                         return null; // Не можем сгенерировать
-                     }
+                    const gr_phrase = `${likerPronoun.gr_gen} ${verbFormGr}`; // μου αρέσεις
+                    const ru_phrase = `${likedPronoun.ru} ${verbFormRu} ${likerPronoun.ru_dat}`; // ты нравишься мне
+                    return { greek: gr_phrase, russian: ru_phrase };
 
-                     // Греческий: Μου αρέσεις (Ты мне нравишься)
-                     const gr_phrase = `${likerPronoun.gr_gen} ${verbFormGr}`;
-                     // Русский: Ты нравишься мне
-                     const ru_phrase = `${likedPronoun.ru} ${verbFormRu} ${likerPronoun.ru_dat}`;
+                } else {
+                     // Вариант: Объект - Существительное ("Мне нравится женщина")
+                     // availableNouns.length > 0 (проверено косвенно через usePronounObject)
+                     const likedNounData = getRandomElement(availableNouns);
+                     const usePlural = Math.random() < 0.5;
+                     const likedNoun_gr_art = usePlural ? likedNounData.gr_pl_art : likedNounData.gr_sg_art;
+                     const likedNoun_ru = usePlural ? likedNounData.ru_pl : likedNounData.ru_sg;
+                     const verbFormGr = usePlural ? aresoVerbData.conjugations['3pl'] : aresoVerbData.conjugations['3sg'];
+                     const verbFormRu = usePlural ? aresoVerbData.ru_conjugations['3pl'] : aresoVerbData.ru_conjugations['3sg'];
+                     if (!verbFormGr || !verbFormRu) { console.error(`Missing 3p conj for areso`); return null; }
 
+                     const gr_phrase = `${likerPronoun.gr_gen} ${verbFormGr} ${likedNoun_gr_art}`; // μου αρέσει η γυναίκα
+                     const ru_phrase = `${likerPronoun.ru_dat} ${verbFormRu} ${likedNoun_ru}`; // мне нравится женщина
                      return { greek: gr_phrase, russian: ru_phrase };
-
-                 } else {
-                      // --- Вариант: Объект - Существительное ("Мне нравится женщина") ---
-                      if (availableNouns.length === 0) return null; // Не можем сгенерировать без существительных
-
-                      const likedNounData = getRandomElement(availableNouns);
-                      const usePlural = Math.random() < 0.5;
-
-                      const likedNoun_gr_art = usePlural ? likedNounData.gr_pl_art : likedNounData.gr_sg_art;
-                      const likedNoun_ru = usePlural ? likedNounData.ru_pl : likedNounData.ru_sg;
-
-                      // Глагол (греч/рус) зависит от числа существительного (3 лицо)
-                      const verbFormGr = usePlural ? aresoVerbData.conjugations['3pl'] : aresoVerbData.conjugations['3sg'];
-                      const verbFormRu = usePlural ? aresoVerbData.ru_conjugations['3pl'] : aresoVerbData.ru_conjugations['3sg'];
-
-                     if (!verbFormGr || !verbFormRu) {
-                         console.error(`Missing 3rd person conjugation for areso`);
-                         return null; // Не можем сгенерировать
-                     }
-
-                      // Греческий: Μου αρέσει η γυναίκα
-                      const gr_phrase = `${likerPronoun.gr_gen} ${verbFormGr} ${likedNoun_gr_art}`;
-                      // Русский: Мне нравится женщина
-                      const ru_phrase = `${likerPronoun.ru_dat} ${verbFormRu} ${likedNoun_ru}`;
-
-                      return { greek: gr_phrase, russian: ru_phrase };
-                 }
+                }
+           }
+        },
+        {
+            id: 'blepo',
+            gr_inf: 'βλέπω',
+            ru_inf: 'видеть',
+            conjugations: {
+                '1sg': 'βλέπω', '2sg': 'βλέπεις', '3sg': 'βλέπει',
+                '1pl': 'βλέπουμε', '2pl': 'βλέπετε', '3pl': 'βλέπουν'
+            },
+            ru_conjugations: {
+                '1sg': 'вижу', '2sg': 'видишь', '3sg': 'видит',
+                '1pl': 'видим', '2pl': 'видите', '3pl': 'видят'
+            },
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => { // nouns не используется
+                if (!availablePronouns || availablePronouns.length < 2) return null;
+                const thisVerb = verbs.find(v => v.id === 'blepo');
+                if (!thisVerb) return null;
+                const subjectPronoun = getRandomElement(availablePronouns);
+                let objectPronoun;
+                do { objectPronoun = getRandomElement(availablePronouns); } while (subjectPronoun === objectPronoun);
+                const subjPersonNum = `${subjectPronoun.person}${subjectPronoun.number}`;
+                const verbFormGr = thisVerb.conjugations[subjPersonNum];
+                const verbFormRu = thisVerb.ru_conjugations[subjPersonNum];
+                const objFormGr = objectPronoun.gr_acc_weak;
+                const objFormRu = objectPronoun.ru_acc;
+                if (!verbFormGr || !verbFormRu || !objFormGr || !objFormRu) { console.error(`Missing forms for blepo`); return null; }
+                const gr_phrase = `${objFormGr} ${verbFormGr}`;
+                const ru_phrase = `${subjectPronoun.ru} ${verbFormRu} ${objFormRu}`;
+                return { greek: gr_phrase, russian: ru_phrase };
             }
+        },
+        {
+            id: 'einai',
+            gr_inf: 'είμαι',
+            ru_inf: 'быть/являться',
+            conjugations: { // Греческие спряжения
+                '1sg': 'είμαι', '2sg': 'είσαι', '3sg': 'είναι',
+                '1pl': 'είμαστε', '2pl': 'είστε', '3pl': 'είναι'
+            },
+            ru_conjugations: { // Русские спряжения (для режимов 'verbs' и 'phrases')
+                '1sg': 'являюсь', '2sg': 'являешься', '3sg': 'является',
+                '1pl': 'являемся', '2pl': 'являетесь', '3pl': 'являются'
+                // Используем "являться", т.к. "быть" в настоящем времени обычно опускается или архаично.
+            },
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => {
+                if (!availablePronouns || availablePronouns.length === 0) return null; // Нужен хотя бы один субъект
+                const einaiVerbData = verbs.find(v => v.id === 'einai');
+                if (!einaiVerbData) return null;
+                if (!availableNouns || availableNouns.length === 0) {
+                    // console.error("Cannot generate 'einai' phrase: no nouns available."); // Можно не логировать, а просто вернуть null
+                    return null; // einai требует существительное
+                }
+
+                // Выбираем субъект и существительное
+                const subjectPronoun = getRandomElement(availablePronouns);
+                const nounData = getRandomElement(availableNouns);
+
+                const usePlural = subjectPronoun.number === 'pl';
+                const noun_gr = usePlural ? nounData.gr_pl : nounData.gr_sg;
+                const noun_ru = usePlural ? nounData.ru_pl : nounData.ru_sg;
+                const personNumber = `${subjectPronoun.person}${subjectPronoun.number}`;
+                const verbFormGr = einaiVerbData.conjugations[personNumber];
+                let subj_ru = subjectPronoun.ru;
+                if (subjectPronoun.number === 'pl' && subjectPronoun.person === 3) subj_ru = 'они';
+
+                const gr_phrase = `${verbFormGr} ${noun_gr}`;
+                const ru_phrase = `${subj_ru} -- ${noun_ru}`;
+                return { greek: gr_phrase, russian: ru_phrase };
+            }
+        },
+        {
+           id: 'thelo',
+           gr_inf: 'θέλω',
+           ru_inf: 'хотеть',
+           conjugations: {
+               '1sg': 'θέλω', '2sg': 'θέλεις', '3sg': 'θέλει',
+               '1pl': 'θέλουμε', '2pl': 'θέλετε', '3pl': 'θέλουν'
+           },
+           ru_conjugations: {
+               '1sg': 'хочу', '2sg': 'хочешь', '3sg': 'хочет',
+               '1pl': 'хотим', '2pl': 'хотите', '3pl': 'хотят'
+           },
+           generatePhraseModePhrase: (availablePronouns, availableNouns) => {
+            if (!availablePronouns || availablePronouns.length < 2) return null;
+            const thisVerb = verbs.find(v => v.id === 'thelo');
+            if (!thisVerb) return null;
+            const subjectPronoun = getRandomElement(availablePronouns);
+            let objectPronoun;
+            do { objectPronoun = getRandomElement(availablePronouns); } while (subjectPronoun === objectPronoun);
+            const subjPersonNum = `${subjectPronoun.person}${subjectPronoun.number}`;
+            const verbFormGr = thisVerb.conjugations[subjPersonNum];
+            const verbFormRu = thisVerb.ru_conjugations[subjPersonNum];
+            const objFormGr = objectPronoun.gr_acc_weak;
+            const objFormRu = objectPronoun.ru_acc;
+            if (!verbFormGr || !verbFormRu || !objFormGr || !objFormRu) { console.error(`Missing forms for thelo`); return null; }
+            const gr_phrase = `${objFormGr} ${verbFormGr}`;
+            const ru_phrase = `${subjectPronoun.ru} ${verbFormRu} ${objFormRu}`;
+            return { greek: gr_phrase, russian: ru_phrase };
         }
-        // Add more verbs here with their ru_conjugations
+        },
+        {
+            id: 'ksero',
+            gr_inf: 'ξέρω',
+            ru_inf: 'знать',
+            conjugations: {
+                '1sg': 'ξέρω', '2sg': 'ξέρεις', '3sg': 'ξέρει',
+                '1pl': 'ξέρουμε', '2pl': 'ξέρετε', '3pl': 'ξέρουν'
+            },
+            ru_conjugations: {
+                '1sg': 'знаю', '2sg': 'знаешь', '3sg': 'знает',
+                '1pl': 'знаем', '2pl': 'знаете', '3pl': 'знают'
+            },
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => {
+                if (!availablePronouns || availablePronouns.length < 2) return null;
+                const thisVerb = verbs.find(v => v.id === 'ksero');
+                if (!thisVerb) return null;
+                const subjectPronoun = getRandomElement(availablePronouns);
+                let objectPronoun;
+                do { objectPronoun = getRandomElement(availablePronouns); } while (subjectPronoun === objectPronoun);
+                const subjPersonNum = `${subjectPronoun.person}${subjectPronoun.number}`;
+                const verbFormGr = thisVerb.conjugations[subjPersonNum];
+                const verbFormRu = thisVerb.ru_conjugations[subjPersonNum];
+                const objFormGr = objectPronoun.gr_acc_weak;
+                const objFormRu = objectPronoun.ru_acc;
+                if (!verbFormGr || !verbFormRu || !objFormGr || !objFormRu) { console.error(`Missing forms for ksero`); return null; }
+                const gr_phrase = `${objFormGr} ${verbFormGr}`;
+                const ru_phrase = `${subjectPronoun.ru} ${verbFormRu} ${objFormRu}`;
+                return { greek: gr_phrase, russian: ru_phrase };
+            }
+        },
+        {
+            id: 'perimeno', // NEW
+            gr_inf: 'περιμένω',
+            ru_inf: 'ждать',
+            conjugations: {
+                '1sg': 'περιμένω', '2sg': 'περιμένεις', '3sg': 'περιμένει',
+                '1pl': 'περιμένουμε', '2pl': 'περιμένετε', '3pl': 'περιμένουν'
+            },
+            ru_conjugations: {
+                '1sg': 'жду', '2sg': 'ждёшь', '3sg': 'ждёт',
+                '1pl': 'ждём', '2pl': 'ждёте', '3pl': 'ждут'
+            },
+            generatePhraseModePhrase: (availablePronouns, availableNouns) => {
+                if (!availablePronouns || availablePronouns.length < 2) return null;
+                const thisVerb = verbs.find(v => v.id === 'perimeno');
+                if (!thisVerb) return null;
+                const subjectPronoun = getRandomElement(availablePronouns);
+                let objectPronoun;
+                do { objectPronoun = getRandomElement(availablePronouns); } while (subjectPronoun === objectPronoun);
+                const subjPersonNum = `${subjectPronoun.person}${subjectPronoun.number}`;
+                const verbFormGr = thisVerb.conjugations[subjPersonNum];
+                const verbFormRu = thisVerb.ru_conjugations[subjPersonNum];
+                const objFormGr = objectPronoun.gr_acc_weak;
+                const objFormRu = objectPronoun.ru_acc;
+                if (!verbFormGr || !verbFormRu || !objFormGr || !objFormRu) { console.error(`Missing forms for perimeno`); return null; }
+                const gr_phrase = `${objFormGr} ${verbFormGr}`;
+                const ru_phrase = `${subjectPronoun.ru} ${verbFormRu} ${objFormRu}`;
+                return { greek: gr_phrase, russian: ru_phrase };
+           }
+        },
     ];
 
     const magicEmojis = ['🧠', '✨', '🤔', '💡', '🔮', '🧙', '🪄'];
@@ -303,8 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'phrases':
             default:
-                 if (availableVerbs.length === 0 || availableNouns.length === 0) {
-                    showSettingsError("Выберите хотя бы один глагол и одно существительное для режима 'Фразы'.");
+                 if (availableVerbs.length === 0) {
+                    showSettingsError("Выберите хотя бы один глагол для режима 'Фразы'.");
                     disableInputs = true;
                 }
                 break;
@@ -389,39 +529,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
 
                 case 'phrases':
-                default:
-                    // Проверка на availableVerbs/Nouns уже сделана выше
-                    const randomVerb = getRandomElement(availableVerbs);
-                    const randomPronoun = getRandomElement(pronouns);
-
-                    if (typeof randomVerb.generatePhraseModePhrase === 'function') {
-                        if (randomVerb.id === 'einai') {
-                             const randomNoun = getRandomElement(availableNouns);
-                             currentPhrase = randomVerb.generatePhraseModePhrase(randomPronoun, randomNoun);
-                        } else if (randomVerb.id === 'areso') {
-                             currentPhrase = randomVerb.generatePhraseModePhrase(randomPronoun, availableNouns);
+                    default:
+                        const randomVerb = getRandomElement(availableVerbs);
+    
+                        if (typeof randomVerb.generatePhraseModePhrase !== 'function') {
+                            throw new Error(`Generator not found for verb ${randomVerb.id}`);
                         }
-                        // Add conditions for other verbs if their generators need different inputs
-                    } else {
-                        console.error(`Generator function 'generatePhraseModePhrase' not found for verb ${randomVerb.id}`);
-                        showError("Ошибка: Не найден генератор фраз для выбранного глагола.");
-                         submitButton.disabled = true; // Disable input if error
-                         speakAnswerButton.disabled = true;
-                        return; // Stop generation
-                    }
-
-                    if (currentPhrase) {
-                         phraseGenerated = true;
-                    } else {
-                         // Handle cases where generatePhraseModePhrase might return null intentionally
-                         // (e.g., areso with no nouns, though primary check handles this)
-                         console.error(`Phrase generation returned null for verb ${randomVerb.id}`);
-                         showError("Не удалось сгенерировать фразу (возможно, из-за нехватки данных).");
-                         submitButton.disabled = true; // Disable input if error
-                         speakAnswerButton.disabled = true;
-                         return; // Stop generation
-                    }
-                    break;
+    
+                        currentPhrase = randomVerb.generatePhraseModePhrase(pronouns, availableNouns);
+    
+                        if (currentPhrase) {
+                            phraseGenerated = true;
+                        } else {
+                                throw new Error(`Не удалось сгенерировать фразу для "${randomVerb.gr_inf}". Проверьте наличие необходимых слов (особенно сущ. для είναι).`);
+                        }
+                        break;
             } // end switch
 
         } catch (error) {
